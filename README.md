@@ -1,4 +1,4 @@
-# 🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard
+# 🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard 🌿
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mubarak-agrisense-dashboard.streamlit.app)
 
@@ -45,6 +45,7 @@ For actual farming decisions, it is crucial to:
 ---
 
 ## 📂 Project Structure
+```
 AgriSense_Project/
 ├── data/
 │   ├── simulated_market_price_data.csv
@@ -61,7 +62,7 @@ AgriSense_Project/
 ├── train_models.py
 ├── requirements.txt
 └── README.md
-
+```
 * `data/`: Contains the CSV files for simulated historical yield, weather forecasts, and market prices.
 * `models/`: Stores the saved machine learning models (`.joblib` files) and their corresponding feature order lists, ensuring consistent predictions.
 * `3mtt_logo.png`: The visual logo displayed in the Streamlit application's sidebar.
