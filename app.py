@@ -17,8 +17,8 @@ else:
 
 # --- Set Streamlit Page Configuration ---
 st.set_page_config(
-    page_title="AgriSense: Smart Agriculture Dashboard",
-    page_icon="🌿",
+    page_title="🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard ",
+    page_icon="🌾",
     layout="wide" # Use wide layout to make better use of screen space
 )
 
@@ -76,7 +76,7 @@ yield_model, yield_model_features_order, price_model, price_model_features_order
 forecast_df, historical_yield_df, historical_price_df, combined_historical_df = load_all_data()
 
 # --- App Title and Description ---
-st.title("🌿 AgriSense: Your Smart Agriculture Companion") # More inviting title
+st.title("🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard") # More inviting title
 st.markdown("""
 Welcome to **AgriSense**, a powerful tool designed to help Nigerian farmers and agricultural stakeholders make smarter, data-driven decisions!
 
