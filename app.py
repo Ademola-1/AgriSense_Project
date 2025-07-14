@@ -439,3 +439,5 @@ Currently, AgriSense operates on **simulated data**. This allows us to demonstra
 
 This transition would transform AgriSense from a powerful demonstration tool into an indispensable, real-time decision-support system for the agricultural community.
 """)
+st.markdown("---")
+st.caption("© 2025 Mubarak Lawal. All rights reserved.")
