@@ -1,4 +1,4 @@
-# 🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard 🌿
+# 🌾 AgriSense: Nigeria's Predictive Farm Intelligence Dashboard 
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mubarak-agrisense-dashboard.streamlit.app)
 
@@ -73,12 +73,14 @@ AgriSense_Project/
 
 ---
 
-## 🚀 Getting Started
+## ⚙️ Running the Project Locally
+
+*(This section is for developers and users who wish to run or contribute to the application on their local machine.)*
 
 ### Prerequisites
 
 * **Python 3.8+**
-* **Anaconda** (highly recommended for environment management) or `pip`
+* **Anaconda** (highly recommended for environment management)
 
 ### Installation
 
