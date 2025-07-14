@@ -8,7 +8,7 @@ from datetime import datetime
 import plotly.express as px # Import Plotly Express
 
 # --- ADDED: 3MTT Logo ---
-logo_path = "3mtt_logo.jpg"
+logo_path = "AgriSense_logo.png"
 if os.path.exists(logo_path):
     st.sidebar.image(logo_path, width=200) # Adjust width as needed
 else:
