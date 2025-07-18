@@ -9,16 +9,11 @@ def generate_simulated_data(
     output_dir='data',
     start_year=2000,
     end_year=datetime.now().year + 1, # Generate historical up to current year, forecasts for current + 1 year
-    entries_per_season_per_region=5, # Number of distinct data points per year/season/region
-    base_yield_tons=2.0, # Baseline yield per hectare
-    yield_variability=0.5, # How much yield can vary
-    base_fertilizer_kg=100, # Base fertilizer used
-    fertilizer_variability=30
+    entries_per_season_per_region=5,
 ):
     """
-    Generates simulated agricultural yield, weather, and market price data.
+    Generates simulated agricultural yield, weather, and market price data with more realistic Nigerian ranges.
     """
-    # Set random seeds for reproducibility
     random_seed = 42
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -26,7 +21,6 @@ def generate_simulated_data(
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # --- Configuration for realistic ranges ---
     regions = [
         'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
         'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'Gombe', 'Imo',
@@ -36,6 +30,37 @@ def generate_simulated_data(
     ]
     crop_types = ['Maize', 'Cassava', 'Rice', 'Yam', 'Sorghum', 'Millet', 'Groundnut', 'Beans']
     seasons = ['Wet', 'Dry']
+
+    # yield ranges (tons/hectare) - based on average to good farm practices in Nigeria
+    crop_yield_ranges = {
+        'Maize': (2.5, 6.0),
+        'Cassava': (15.0, 30.0), 
+        'Rice': (2.0, 5.0),     
+        'Yam': (10.0, 25.0),
+        'Sorghum': (1.5, 4.0),
+        'Millet': (1.0, 3.0),
+        'Groundnut': (1.0, 2.5),
+        'Beans': (1.0, 2.0)
+    }
+
+    # Prices generally increase over time due to inflation and market dynamics
+    crop_price_ranges = {
+        'Maize': (250, 600),   
+        'Cassava': (180, 350),  
+        'Rice': (800, 1500),
+        'Yam': (250, 500),
+        'Sorghum': (200, 500),
+        'Millet': (200, 450),
+        'Groundnut': (400, 900),
+        'Beans': (500, 1200)
+    }
+
+    # Nigeria's inflation has been high (20-25% recently)
+    average_annual_inflation_rate = 0.20
+    season_weather_params = {
+        'Wet': {'rainfall': (600, 1000), 'temp': (22, 28), 'pest_prob': 0.15},
+        'Dry': {'rainfall': (50, 300), 'temp': (28, 35), 'pest_prob': 0.05}
+    }
 
     # --- Simulated data lists ---
     yield_data = []
@@ -48,40 +73,42 @@ def generate_simulated_data(
     for year in range(start_year, end_year + 1):
         for region in regions:
             for season in seasons:
-                # Base weather conditions for season
-                if season == 'Wet':
-                    avg_rainfall_range = (600, 1000) # mm
-                    avg_temp_range = (22, 28) # °C
-                    base_pest_prob = 0.15 # Higher chance of pests in wet
-                else: # Dry season
-                    avg_rainfall_range = (50, 300) # mm
-                    avg_temp_range = (28, 35) # °C
-                    base_pest_prob = 0.05 # Lower chance of pests in dry
+                # Get base weather for the season
+                weather_params = season_weather_params[season]
+                avg_rainfall_range = weather_params['rainfall']
+                avg_temp_range = weather_params['temp']
+                base_pest_prob = weather_params['pest_prob']
 
                 for _ in range(entries_per_season_per_region):
-                    # Simulate slight variations around base values
+                    # Simulate weather and inputs
                     rainfall_mm = random.uniform(avg_rainfall_range[0], avg_rainfall_range[1])
                     avg_temp_c = random.uniform(avg_temp_range[0], avg_temp_range[1])
                     pest_outbreak_flag = 1 if random.random() < base_pest_prob else 0
-                    fertilizer_used_kg = max(0, random.gauss(base_fertilizer_kg, fertilizer_variability))
-
-                    # Simulate yield based on factors (simple linear model for simulation)
-                    # More rain, optimal temp, more fertilizer = higher yield
-                    # Pest outbreak = lower yield
-                    sim_yield = (
-                        base_yield_tons
-                        + (rainfall_mm / 1000) * 0.5  # Positive effect of rainfall
-                        - ((avg_temp_c - 28)**2) * 0.01 # Optimal temp around 28, quadratic penalty for deviation
-                        + (fertilizer_used_kg / 100) * 0.3 # Positive effect of fertilizer
-                        - (pest_outbreak_flag * 0.4) # Negative effect of pests
-                        + random.uniform(-yield_variability, yield_variability) # Random noise
-                    )
-                    sim_yield = max(0.5, sim_yield) # Ensure yield is not too low
+                    fertilizer_used_kg = max(50, random.gauss(150, 50))
 
                     # --- Generate yield data for each crop type (for historical data) ---
-                    # Only add yield data for historical years (up to current year)
                     if year <= datetime.now().year:
                         for crop_type in crop_types:
+                            min_yield, max_yield = crop_yield_ranges.get(crop_type, (1.0, 3.0))
+
+                            # Simulate yield, with weather and pest impacts
+                            sim_yield = random.uniform(min_yield, max_yield)
+
+                            # Significant rainfall deviation
+                            if rainfall_mm < avg_rainfall_range[0] * 0.7 or rainfall_mm > avg_rainfall_range[1] * 1.3:
+                                sim_yield *= random.uniform(0.7, 0.9)
+
+                            # Extreme temperature deviation
+                            if avg_temp_c < (avg_temp_range[0] + 2) or avg_temp_c > (avg_temp_range[1] - 2):
+                                sim_yield *= random.uniform(0.8, 0.95)
+
+                            # Pest outbreak effect
+                            if pest_outbreak_flag:
+                                sim_yield *= random.uniform(0.6, 0.85)
+
+                            # Ensure yield is not negative or ridiculously low
+                            sim_yield = max(0.5, sim_yield) 
+
                             yield_data.append({
                                 'Year': year,
                                 'Region': region,
@@ -91,48 +118,56 @@ def generate_simulated_data(
                                 'Avg_Temp_C': avg_temp_c,
                                 'Pest_Outbreak_Flag': pest_outbreak_flag,
                                 'Fertilizer_Used_kg_per_hectare': fertilizer_used_kg,
-                                'Yield_tons_per_hectare': sim_yield # Common yield for all crops given conditions
+                                'Yield_tons_per_hectare': sim_yield
                             })
 
                     # --- Generate Market Price Data (for historical data) ---
-                    # Only add market price data for historical years (up to current year)
                     if year <= datetime.now().year:
                         for crop_type in crop_types:
-                            base_price = 150 # NGN/kg
-                            if crop_type == 'Rice': base_price *= 1.2
-                            if crop_type == 'Yam': base_price *= 0.9
-                            if crop_type == 'Maize': base_price *= 0.8
-                            if season == 'Wet': base_price *= 0.95 # Prices might be slightly lower post-harvest wet season
-                            if season == 'Dry': base_price *= 1.05 # Prices might be slightly higher due to scarcity
-                            price_per_kg = max(50, random.gauss(base_price, 20) + (year - start_year) * 2) # Slight inflation over years
+                            min_price, max_price = crop_price_ranges.get(crop_type, (100, 200))
+
+                            # Base price for the crop type, adding some random variation
+                            price_per_kg = random.uniform(min_price, max_price)
+
+                            # Apply general inflation over years
+                            inflation_factor = (1 + average_annual_inflation_rate)**(year - start_year)
+                            price_per_kg *= inflation_factor
+
+                            # Seasonal adjustments (often prices higher in dry season/off-season)
+                            if season == 'Wet':
+                                price_per_kg *= random.uniform(0.9, 1.0)
+                            elif season == 'Dry':
+                                price_per_kg *= random.uniform(1.0, 1.1)
+
+                            price_per_kg = max(50, price_per_kg)
 
                             market_price_data.append({
                                 'Year': year,
-                                'Region': region, # Market prices can vary by region too
+                                'Region': region,
                                 'Crop_Type': crop_type,
                                 'Season': season,
                                 'Price_per_kg': price_per_kg
                             })
 
                 # --- Generate Weather Forecast Data (for current year and future) ---
-                # This ensures we have forecast data for years that the app allows for prediction
-                if year >= datetime.now().year: # Generate forecasts for current year and future (up to end_year)
+                if year >= datetime.now().year:
                     # Simulate forecast variability (e.g., forecast might slightly differ from actual)
-                    forecast_rainfall = random.uniform(rainfall_mm * 0.9, rainfall_mm * 1.1)
-                    forecast_temp = random.uniform(avg_temp_c * 0.95, avg_temp_c * 1.05)
+                    forecast_rainfall = random.uniform(avg_rainfall_range[0] * 0.9, avg_rainfall_range[1] * 1.1)
+                    forecast_temp = random.uniform(avg_temp_range[0] * 0.95, avg_temp_range[1] * 1.05)
 
                     # Determine drought/flood risk for forecast
                     drought_risk = 0
                     flood_risk = 0
+                    # Define thresholds relative to average ranges
                     if season == 'Wet':
-                        if forecast_rainfall < avg_rainfall_range[0] * 0.8: # Significantly below expected wet season rain
+                        if forecast_rainfall < avg_rainfall_range[0] * 0.8:
                             drought_risk = 1
-                        if forecast_rainfall > avg_rainfall_range[1] * 1.2: # Significantly above expected wet season rain
+                        if forecast_rainfall > avg_rainfall_range[1] * 1.2:
                             flood_risk = 1
                     else: # Dry season
-                        if forecast_rainfall < avg_rainfall_range[0] * 0.5: # Extremely low for dry season
+                        if forecast_rainfall < avg_rainfall_range[0] * 0.5:
                             drought_risk = 1
-                        if forecast_rainfall > avg_rainfall_range[1] * 1.5: # Unusually high for dry season
+                        if forecast_rainfall > avg_rainfall_range[1] * 1.5:
                             flood_risk = 1
 
                     weather_forecast_data.append({
@@ -145,9 +180,7 @@ def generate_simulated_data(
                         'Flood_Risk_Flag': flood_risk
                     })
 
-    # Convert to DataFrames
     yield_df = pd.DataFrame(yield_data)
-    # Drop duplicates for forecast and price as they are per-region/season/year, not per 'entry'
     forecast_df = pd.DataFrame(weather_forecast_data).drop_duplicates(subset=['Year', 'Region', 'Season']).reset_index(drop=True)
     price_df = pd.DataFrame(market_price_data).drop_duplicates(subset=['Year', 'Region', 'Crop_Type', 'Season']).reset_index(drop=True)
 
@@ -159,7 +192,6 @@ def generate_simulated_data(
     yield_df.to_csv(yield_output_path, index=False)
     forecast_df.to_csv(forecast_output_path, index=False)
     price_df.to_csv(price_output_path, index=False)
-
 
     print(f"Simulated yield data saved to {yield_output_path} ({len(yield_df)} rows)")
     print(f"Simulated weather forecast data saved to {forecast_output_path} ({len(forecast_df)} rows)")

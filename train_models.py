@@ -19,9 +19,9 @@ print("--- Starting Model Training Process ---")
 # --- Configuration ---
 DATA_DIR = 'data'
 MODELS_DIR = 'models'
-PLOTS_DIR = 'plots' # Define PLOTS_DIR explicitly (though no static plots saved here anymore)
-os.makedirs(MODELS_DIR, exist_ok=True) # Ensure models folder exists
-os.makedirs(PLOTS_DIR, exist_ok=True) # Create a folder for plots if you want to save them separately
+PLOTS_DIR = 'plots'
+os.makedirs(MODELS_DIR, exist_ok=True)
+os.makedirs(PLOTS_DIR, exist_ok=True)
 
 YIELD_DATA_FILE = 'simulated_yield_data.csv'
 PRICE_DATA_FILE = 'simulated_market_price_data.csv'
@@ -39,7 +39,6 @@ except Exception as e:
     print(f"An unexpected error occurred during data loading: {e}")
     exit()
 
-# --- Combine relevant data ---
 # Merge yield and price data for comprehensive analysis (and potential features)
 combined_df = pd.merge(yield_df, price_df, on=['Region', 'Crop_Type', 'Year', 'Season'], how='outer')
 combined_df['Year'] = combined_df['Year'].astype(int)
@@ -72,8 +71,6 @@ print(df_encoded.head())
 print("\nColumns after encoding (for model training):")
 print(df_encoded.columns.tolist())
 
-# --- Define features for Yield Model ---
-# Yield model will use all features except Price_per_kg
 yield_model_features_order = [col for col in df_encoded.columns if col not in ['Yield_tons_per_hectare', 'Price_per_kg']]
 print("\nFeatures that will be used for the YIELD model (and their order):")
 print(yield_model_features_order)
@@ -122,13 +119,12 @@ print(f"Yield Model saved to: {os.path.join(MODELS_DIR, yield_model_filename)}")
 print(f"Yield Model Features Order saved to: {os.path.join(MODELS_DIR, yield_features_order_filename)}")
 
 
-# --- NEW: Define features for Price Model ---
-# Price model will use all features except Yield_tons_per_hectare
+
 price_model_features_order = [col for col in df_encoded.columns if col not in ['Price_per_kg', 'Yield_tons_per_hectare']]
 print("\nFeatures that will be used for the PRICE model (and their order):")
 print(price_model_features_order)
 
-# --- NEW: Prepare Features (X) and Target (y) for Price Model Training ---
+# --- Prepare Features (X) and Target (y) for Price Model Training ---
 y_price = df_encoded['Price_per_kg']
 X_price = df_encoded[price_model_features_order]
 
@@ -137,20 +133,20 @@ print(f"Target (y_price) shape: {y_price.shape}")
 print("\nFirst 5 rows of features for price model training:")
 print(X_price.head())
 
-# --- NEW: Train-Test Split for Price Model ---
+# --- Train-Test Split for Price Model ---
 X_train_price, X_test_price, y_train_price, y_test_price = train_test_split(
     X_price, y_price, test_size=0.2, random_state=random_seed
 )
 print(f"\nPrice Training set size: {len(X_train_price)} samples")
 print(f"Price Testing set size: {len(X_test_price)} samples")
 
-# --- NEW: Model Training (Random Forest Regressor for Price Prediction) ---
+# --- Model Training (Random Forest Regressor for Price Prediction) ---
 print("\nTraining RandomForestRegressor model for Price Prediction...")
 price_model = RandomForestRegressor(n_estimators=100, random_state=random_seed, n_jobs=-1)
 price_model.fit(X_train_price, y_train_price)
 print("Price model training complete.")
 
-# --- NEW: Model Evaluation (Price) ---
+# --- Model Evaluation (Price) ---
 print("\nEvaluating Price Model Performance...")
 y_pred_price = price_model.predict(X_test_price)
 
@@ -160,7 +156,7 @@ r2_price = r2_score(y_test_price, y_pred_price)
 print(f"Mean Absolute Error (MAE) for Price Prediction: {mae_price:.2f} NGN/kg")
 print(f"R-squared (R2 Score) for Price Prediction: {r2_price:.2f}")
 
-# --- NEW: Save Price Model and Features Order ---
+# --- Save Price Model and Features Order ---
 print("\nSaving trained price model and feature order...")
 price_model_filename = 'price_prediction_model.joblib'
 price_features_order_filename = 'price_model_features_order.joblib'

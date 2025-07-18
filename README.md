@@ -56,7 +56,7 @@ AgriSense_Project/
 │   ├── price_prediction_model.joblib
 │   ├── yield_model_features_order.joblib
 │   └── yield_prediction_model.joblib
-├── 3mtt_logo.png
+├── AgriSense_logo.png
 ├── app.py
 ├── generate_data.py
 ├── train_models.py
