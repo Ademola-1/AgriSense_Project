@@ -269,9 +269,9 @@ fertilizer_used_kg = st.sidebar.slider("8. Fertilizer Used (kg per hectare)", mi
 # Profitability Analysis Inputs
 st.sidebar.markdown("---")
 st.sidebar.subheader("For Profitability Analysis:")
-land_area_hectares = st.sidebar.number_input("Land Area (plot)", min_value=0.1, max_value=100.0, value=1.0)
+land_area_hectares = st.sidebar.number_input("Land Area (hectare))", min_value=0.1, max_value=100.0, value=1.0)
 estimated_costs_per_hectare = st.sidebar.number_input(
-    "Estimated Costs (NGN per plot)", 
+    "Estimated Costs (NGN per (hectare))", 
     min_value=100000,
     max_value=2000000, 
     value=450000,      
