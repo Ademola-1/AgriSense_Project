@@ -1,2 +1,11 @@
 # Ignore Streamlit secrets file
 .streamlit/secrets.toml
+stsecrets.toml 
+
+# Google Cloud credentials (sensitive key file)
+credentials.json
+
+ __pycache__/
+ *.pyc
+ .venv/
+ venv/
